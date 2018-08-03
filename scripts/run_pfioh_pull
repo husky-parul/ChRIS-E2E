@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 pfurl --verb POST --raw --httpResponseBodyParse --http $1/api/v1/cmd --msg \
 "{  \"action\": \"pullPath\",
     \"meta\": {
