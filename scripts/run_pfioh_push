@@ -11,7 +11,6 @@ pfurl --verb POST --httpResponseBodyParse --raw --http $1/api/v1/cmd --msg \
         \"transport\": {
             \"mechanism\":    \"compress\",
             \"compress\": {
-                \"encoding\": \"base64\",
                 \"archive\":  \"zip\",
                 \"unpack\":   true,
                 \"cleanup\":  true
