@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 INTERACTIVE=0
 DEPS=0
@@ -59,6 +59,11 @@ Options:
     esac
     shift
 done
+
+if ! [ -d ChRIS-E2E ]; then
+    echo "You must run this script from the parent directory to ChRIS-E2E"
+    exit 1
+fi
 
 if [ "$TEST" -eq "1" ]; then
     #check openshift pman
@@ -153,7 +158,7 @@ if [ "$DEPS" -eq "1" ];then
     sudo setenforce 0
 
     #install openshift client tools
-    sudo dnf install origin-clients.x86_64
+    sudo dnf install -y origin-clients
 
     #update packages  :( slow but it won't work if you don't.
     sudo dnf update -y
@@ -203,8 +208,10 @@ oc project myproject
 oc create secret generic kubecfg --from-file=$HOME/.kube/config -n myproject
 rm -f ~/.kube/config
 oc login --username='developer' --password='developer' --server=localhost:8443 --insecure-skip-tls-verify=true
+oc create -f pman/openshift/example-secret.yml
 oc new-app pman/openshift/pman-openshift-template-without-swift.json
 oc set env dc/pman OPENSHIFTMGR_PROJECT=myproject
+oc create -f pfioh/openshift/example-secret.yml
 oc new-app pfioh/openshift/pfioh-openshift-template-without-swift.json
 
 #restarts jobs in interactive terminals
