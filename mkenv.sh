@@ -67,63 +67,33 @@ fi
 
 if [ "$TEST" -eq "1" ]; then
     #check openshift pman
-    echo "Testing if openshift pman can be reached with hello"
-    pfurl --verb POST --raw --http pman-myproject.127.0.0.1.nip.io/api/v1/cmd --jsonwrapper 'payload' --msg \
-     '{  "action": "hello",
-             "meta": {
-                     "askAbout":     "sysinfo",
-                     "echoBack":     "Hi there!"
-             }
-     }' --quiet --jsonpprintindent 4 
-    
-    #check pfioh
-    echo "Testing if openshift pfioh can be reached with hello"
-    pfurl --verb POST --raw --http 127.0.0.1:5055/api/v1/cmd --httpResponseBodyParse --jsonwrapper 'payload' --msg \
-     '{  "action": "hello",
-             "meta": {
-                     "askAbout":     "sysinfo",
-                     "echoBack":     "Hi there!"
-             }
-     }' --quiet --jsonpprintindent 4 
+    echo "*** Testing if openshift pman can be reached with hello"
+    ./ChRIS-E2E/scripts/run_hello pman-myproject.127.0.0.1.nip.io/api/v1/cmd
+    echo "*** Testing if openshift pfioh can be reached with hello"
+    ./ChRIS-E2E/scripts/run_hello pfioh-myproject.127.0.0.1.nip.io/api/v1/cmd
+    echo "*** Testing if openshift pfioh can be reached with hello"
+    ./ChRIS-E2E/scripts/run_hello pfioh-myproject.127.0.0.1.nip.io/api/v1/cmd
+    echo "*** Testing if remote pman and pfioh can be reached with hello"
+    ./ChRIS-E2E/scripts/run_pfcon_hello 127.0.0.1:5005 openshiftlocal
 
     #check CUBE user chris
-    echo "Testing if the backend can be reached by user chris"
+    echo "*** Testing if the backend can be reached by user chris"
     pfurl --auth chris:chris1234 --verb GET --raw --http 127.0.0.1:8000/api/v1/ \
         --quiet --jsonpprintindent 4
     #check CUBE user CUBE
-    echo "Testing if the backend can be reached by user cube"
+    echo "*** Testing if the backend can be reached by user cube"
     pfurl --auth cube:cube1234 --verb GET --raw --http 127.0.0.1:8000/api/v1/ \
         --quiet --jsonpprintindent 4
     
-    #check pfcon --hangs
-    echo "Testing if local pman and pfioh can be reached through pfcon"
-    pfurl --verb POST --raw --http 127.0.0.1:5005/api/v1/cmd --httpResponseBodyParse --jsonwrapper 'payload' --msg \
-    '{  "action": "hello",
-        "meta": {
-                    "askAbout":     "sysinfo",
-                    "echoBack":      "Hi there!",
-                    "service":       "host"
-                }
-    }'
-
-    echo "Testing if remote pman and pfioh can be reached with hello"
-    pfurl --verb POST --raw --http 127.0.0.1:5005/api/v1/cmd --httpResponseBodyParse --jsonwrapper 'payload' --msg \
-    '{  "action": "hello",
-        "meta": {
-                    "askAbout":     "sysinfo",
-                    "echoBack":      "Hi there!",
-                    "service":       "openshiftlocal"
-                }
-    }'
-    
     #full integration tests
-    echo "Running Integration tests"
+    echo "*** Running Integration tests"
     pushd ChRIS_ultron_backEnd/
     sudo docker-compose exec chris_dev python manage.py test
+    popd
     exit 0
 fi
 
-# if the user wants to install dependencies on their local
+# if the user wants to install dependencies on their local system
 if [ "$DEPS" -eq "1" ];then
     #these will throw errors if they are alreay in local dir, but the code will keep running
     git clone https://github.com/FNNDSC/pman.git
