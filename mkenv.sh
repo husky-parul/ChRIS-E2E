@@ -86,7 +86,7 @@ if [ "$TEST" -eq "1" ]; then
         --quiet --jsonpprintindent 4
     
     #full integration tests
-    echo "*** Running Integration tests"
+    echo "*** Running integration tests"
     pushd ChRIS_ultron_backEnd/
     sudo docker-compose exec chris_dev python manage.py test
     popd
@@ -115,7 +115,7 @@ if [ "$DEPS" -eq "1" ];then
     #install docker compose
     sudo dnf install docker-compose -y
 
-    #configure environment for openshift and chris
+    #configure environment for OpenShift and ChRIS
     su -c "echo INSECURE_REGISTRY=\'--insecure-registry 172.30.0.0/16\' >> /etc/sysconfig/docker"
     sudo systemctl daemon-reload
     sudo systemctl restart docker
@@ -135,24 +135,24 @@ if [ "$DEPS" -eq "1" ];then
 fi
 
 #local install of chris env
-echo "Setting up local Chris Cluster"
+echo "*** Setting up local Chris cluster"
 pushd ChRIS_ultron_backEnd/
 sudo docker-compose up -d
 sudo docker-compose exec chris_dev_db sh -c 'while ! mysqladmin -uroot -prootp status 2> /dev/null; do sleep 5; done;'
 sudo docker-compose exec chris_dev_db mysql -uroot -prootp -e 'GRANT ALL PRIVILEGES ON *.* TO "chris"@"%"'
 sudo docker-compose exec chris_dev /bin/bash -c 'python manage.py migrate'
-echo "Setting superuser chris:chris1234 ..."
+echo "*** Setting superuser chris:chris1234 ..."
 sudo docker-compose exec chris_dev /bin/bash -c 'python manage.py createsuperuser --noinput --username chris --email dev@babymri.org 2> /dev/null;'
 sudo docker-compose exec chris_dev /bin/bash -c \
 'python manage.py shell -c "from django.contrib.auth.models import User; user = User.objects.get(username=\"chris\"); user.set_password(\"chris1234\"); user.save()"'
 echo ""
-echo "Setting normal user cube:cube1234 ..."
+echo "*** Setting normal user cube:cube1234 ..."
 sudo docker-compose exec chris_dev /bin/bash -c 'python manage.py createsuperuser --noinput --username cube --email dev@babymri.org 2> /dev/null;'
 sudo docker-compose exec chris_dev /bin/bash -c \
 'python manage.py shell -c "from django.contrib.auth.models import User; user = User.objects.get(username=\"cube\"); user.set_password(\"cube1234\"); user.save()"'
 echo ""
-echo "Setting up openshift environment"
 popd
+echo "*** Setting up Openshift environment"
 sudo oc cluster up
 sudo oc login -u system:admin --insecure-skip-tls-verify=true
 sudo oc create sa robot -n myproject
@@ -168,7 +168,7 @@ token_val=$(sudo oc describe secret $token | grep "token: *" )
 token_val=$(echo "$token_val" | cut -c 7- | sed -e 's/^[ \t]*//')
 
 #set up shared dir and scc restricted 
-sudo mkdir /tmp/share
+sudo mkdir -p /tmp/share
 sudo chcon -R -t svirt_sandbox_file_t /tmp/share/
 sudo oc patch scc restricted -p 'allowHostDirVolumePlugin: true'
 sudo oc patch scc restricted -p '"runAsUser": {"type": "RunAsAny"}'
