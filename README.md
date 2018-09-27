@@ -22,7 +22,7 @@ firewall-cmd --permanent --zone dockerc --add-port 8443/tcp
 firewall-cmd --permanent --zone dockerc --add-port 53/udp
 firewall-cmd --permanent --zone dockerc --add-port 8053/udp
 firewall-cmd --reload
-sudo dnf install origin-clients.x86_64
+sudo dnf install origin-clients
 sudo dnf update -y
 ```
 
