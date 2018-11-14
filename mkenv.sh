@@ -136,6 +136,7 @@ fi
 
 #local install of chris env
 echo "*** Setting up local Chris cluster"
+sudo chcon -Rt svirt_sandbox_file_t ChRIS_ultron_backEnd/
 pushd ChRIS_ultron_backEnd/
 sudo docker-compose up -d
 sudo docker-compose exec chris_dev_db sh -c 'while ! mysqladmin -uroot -prootp status 2> /dev/null; do sleep 5; done;'

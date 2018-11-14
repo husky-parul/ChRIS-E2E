@@ -37,7 +37,7 @@ popd
 ```
 
 ## Before you run
-In order to run this script, a version of the ChRIS Ultron Backend, Pfioh, and Pman must be in your working directory. If you plan to make changes to these repos, you should fork them and clone your forks in ChRIS-E2E's working directory. If you don't have a fork of these repos, you can clone them from the following repos with these commands:
+In order to run this script, a version of the ChRIS Ultron Backend, Pfioh, and Pman must be in your working directory. If you plan to make changes to these repos, you should fork and clone the repos into the same directory as ChRIS-E2E. If you don't have a fork of these repos, you can clone them from the following repos with these commands:
 ```shell
  git clone https://github.com/FNNDSC/pman.git
  git clone https://github.com/FNNDSC/pfioh.git
