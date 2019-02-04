@@ -11,7 +11,7 @@ sudo dnf install docker docker-compose -y
 
 ### Start Docker Service
 ```shell
-systemctl start docker
+sudo systemctl start docker
 ```
 
 ### OpenShift
@@ -35,10 +35,7 @@ sudo dnf update -y
 To communicate with the components of ChRIS, you need a python function called pfurl. The easiest way to get it working is as follows:
 ```shell
 git clone https://github.com/FNNDSC/pfurl.git
-sudo dnf install gcc
-sudo dnf install redhat-rpm-config
-sudo dnf install python2-devel
-sudo dnf install python3-devel
+sudo dnf install gcc redhat-rpm-config python2-devel python3-devel
 pushd pfurl/
 sudo pip3 install .
 popd   
