@@ -1,12 +1,18 @@
+// pipeline {
+//     agent {
+//         docker { image 'node:7-alpine' }
+//     }
+//     stages {
+//         stage('Test') {
+//             steps {
+//                 sh 'node --version'
+//             }
+//         }
+//     }
+// }
+
 pipeline {
-
-	agent { 
-		docker { 
-			image '13065729n/centos-python3:latest' 
-			args '-u root:root -v $HOME/workspace'
-		} 
-	}
-
+	agent any
 	triggers {
 		cron('*/5 * * * *')
 	}
@@ -14,7 +20,11 @@ pipeline {
 	stages {
 		stage('test') {
 			steps {
-				sh 'python3.6 -u moc-health-check/automate.py'
+				// sh 'python3.6 -u moc-health-check/automate.py'
+				sh 'pwd'
+				sh 'ls -la'
+				sh 'python3 --version'
+				sh 'python3 -u moc-health-check/automate.py'
 			}
 
 			post {
