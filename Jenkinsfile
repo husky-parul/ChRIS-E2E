@@ -12,15 +12,14 @@
 // }
 
 pipeline {
-	agent any
+	agent { node { label 'python3' } }
 	triggers {
-		cron('*/5 * * * *')
+		cron('*/10 * * * *')
 	}
 
 	stages {
 		stage('test') {
 			steps {
-				// sh 'python3.6 -u moc-health-check/automate.py'
 				sh 'pwd'
 				sh 'ls -la'
 				sh 'python3 --version'
@@ -31,7 +30,7 @@ pipeline {
 				failure {
 					load "env.groovy"
 					echo "${env.DB_URL}"
-					emailext attachmentsPattern: 'moc-health-check/error.log', body: "${env.DB_URL}", subject: 'test', to: '13065729n@gmail.com'
+					emailext attachmentsPattern: 'moc-health-check/error.log', body: "${env.DB_URL}", subject: 'test', to: 'parsingh@redhat.com'
 				}
 			}
 		}
