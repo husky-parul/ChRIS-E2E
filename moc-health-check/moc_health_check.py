@@ -104,7 +104,7 @@ class Health_Checker:
 
     # Calculating success rate of pman & pfioh
     def prog_flow(self, RANGE, max_value, path_error_file, attempts, success_pfioh_push,success_pman_run, success_pman_status, success_pfioh_pull):
-
+        print("1111111111111111111111111")
         list_functions = [self.run_pfioh_push, self.pman_run, self.run_pman_status, self.run_pfioh_pull] # contains methods which would test ChRIS framework 
 
         dict_functions = {self.run_pfioh_push:success_pfioh_push, self.pman_run:success_pman_run,
@@ -115,6 +115,7 @@ class Health_Checker:
 
         # Iterate through list of methods and calculate the success rate for each aspect of ChRIS framework
         for element in list_functions:
+            print ("element name: ", element)
             
             if attempts > int(self.RANGE): 
                 return (tuple(dict_functions.values())) # Returning success rates for each of methods
@@ -129,6 +130,7 @@ class Health_Checker:
 
     # Run a job in Pman
     def pman_run(self):
+        print("$$$$$$$$$$$$$$$$$$$$$$$$ run pman called?")
         post_request = {   "action": "run",
             "meta":  {
                 "cmd": "simpledsapp.py --prefix test- --sleepLength 0 /share/incoming /share/outgoing",
@@ -235,8 +237,11 @@ class Health_Checker:
     
     # Check if commands executed properly
     def verify(self,result):
+        
         try:
-            if result['stdout']['status'] or result['stdout']['status'] == "finished": 
+            print("****************  result: ", result)
+            print("In verify: ", result['status'])
+            if result['status'] or result['status'] == "finished": 
                 return True
             else:
                 return False
@@ -252,6 +257,7 @@ class Health_Checker:
     def env_write(self,state, msg):
         if state==False:
             msg = msg[2:]
+            print("Message:    ")
             self.export(msg, 'env.groovy')
             raise Exception
     
@@ -270,6 +276,7 @@ class Health_Checker:
     
     # Reentrancy testing - checks if a job with specific JID is present in Pman
     def check_job_status(self):
+        print("22222222222222222222222 here??????")
         if self.verify(self.run_pman_status()) or self.job_execution(self.run_pman_status()):
             self.job_delete()
     

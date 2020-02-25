@@ -12,18 +12,20 @@
 // }
 
 pipeline {
-	agent { node { label 'python3' } }
+	agent any
 	triggers {
-		cron('*/10 * * * *')
+		cron('*/360 * * * *')
 	}
 
 	stages {
 		stage('test') {
 			steps {
-				sh 'pwd'
-				sh 'ls -la'
-				sh 'python3 --version'
-				sh 'python3 -u moc-health-check/automate.py'
+				// sh 'python3.6 -u moc-health-check/automate.py'
+				sh '''
+					pwd
+					ls -la ./moc-health-check/
+					python3 -u moc-health-check/automate.py
+				'''
 			}
 
 			post {
