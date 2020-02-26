@@ -47,7 +47,7 @@ class Health_Checker:
         post_request = {   "action": "delete",
             "meta":  {
                 "key": "jid",
-                "value": '"' + self.JID + '"'
+                "value": self.JID 
             }
         }
 
@@ -57,12 +57,15 @@ class Health_Checker:
                     http                        = '%s/%s' % (self.PMAN_URL, "api/v1/cmd"),
                     b_quiet                     = False,
                     b_raw                       = True,
-                    b_httpResponseBodyParse     = True,
-                    jsonwrapper                 = '',
+                    b_httpResponseBodyParse     = False,
+                    jsonwrapper                 = 'payload',
                     authToken                   = self.password
         )
-
-        return (json.loads(dataComs()))
+        response = dataComs()
+        print("------------------------------------- \nDeleting old job")
+        j_payload = json.loads(response)
+        print(j_payload)
+        return j_payload
     
     # Upload data to swift 
     def run_pfioh_push(self):
@@ -94,12 +97,24 @@ class Health_Checker:
                     jsonwrapper                 = '',
                     authToken                   = self.password
         )
-        print(dataComs())
-        return (json.loads(dataComs()))
+        response = dataComs()
+        j_payload = json.loads(response)
+        print(j_payload)
+        return j_payload
     
     # Sets exponential backoff
     def backoff(self, attempt, max_value):
         return min(max_value,self.WAIT * 2 ** attempt)
+
+    def isComplete(self, ret):
+        count = 0
+        for e in ret:
+            if e >= 1:
+                count += 1
+        if count == 4:
+            return True
+        else:
+            return False
 
 
     # Calculating success rate of pman & pfioh
@@ -110,34 +125,66 @@ class Health_Checker:
         dict_functions = {self.run_pfioh_push:success_pfioh_push, self.pman_run:success_pman_run,
                         self.run_pman_status:success_pman_status, self.run_pfioh_pull:success_pfioh_pull} # variables with success rates that correspond to methods
 
-        print("Iteration " + str(attempts))
-        print("_________________")
+      
 
         # Iterate through list of methods and calculate the success rate for each aspect of ChRIS framework
         for element in list_functions:
+            print("^^^^^^^^^^^^^^^  at start ele: ", element)
             
-            if attempts > int(self.RANGE): 
-                return (tuple(dict_functions.values())) # Returning success rates for each of methods
-
-            elif self.verify(element()):
+            if self.verify(element(), element):
+                print("---------------------- ele: ",element)
+                
                 dict_functions[element] += 1
+                print("------------------- : ",tuple(dict_functions.values()))
+                if self.isComplete(tuple(dict_functions.values())):
+                    return tuple(dict_functions.values())
 
+            elif attempts > max_value:
+                print("Max: ", max_value)
+                print("attempts: ", attempts)
+                return tuple(dict_functions.values())
             else:
+                print("!!!!!!!!!!!!!!!! else")
                 self.log_error(path_error_file, str(element()))
                 time.sleep(self.backoff(self.attempts,max_value))
                 return self.prog_flow(RANGE,max_value, path_error_file, attempts+1, dict_functions[list(dict_functions)[0]],dict_functions[list(dict_functions)[1]],dict_functions[list(dict_functions)[2]],dict_functions[list(dict_functions)[3]])
+            time.sleep(10)
 
+    
+    
+     # Check if commands executed properly
+    def verify(self,result, service):
+        if service == self.run_pfioh_push:
+            if result['stdout']['status'] or result['stdout']['status'] == "finished": 
+                return True
+            else:
+                return False
+        elif service == self.pman_run:
+           return (True if result['status'] == True else False)
+           
+        elif service == self.run_pfioh_pull:
+            return(True if result['stdout']['status'] == True else False)
+        elif service == self.run_pman_status:
+            return (True if ('finished' in result['d_ret']['l_status'] or result['status'] == 'Not Found') else False)
+        else:
+             exit(0)
+          
+       
+    
+    
+    
+    
     # Run a job in Pman
     def pman_run(self):
         post_request = {   "action": "run",
             "meta":  {
-                "cmd": "simpledsapp.py --prefix test- --sleepLength 0 /share/incoming /share/outgoing",
+                "cmd": "/usr/src/simpledsapp/simpledsapp.py --prefix test- --sleepLength 0 /share/incoming /share/outgoing",
                 "auid": "mochealthcheck",
-                "jid": '"' + self.JID + '"',
+                "jid": self.JID,
                 "threaded": True,
                 "container": {
                         "target": {
-                            "image" : "fnndsc/pl-simpledsapp"
+                            "image" : "singhp11/simpledsapp"
                         }
                 }
             }
@@ -149,12 +196,15 @@ class Health_Checker:
                     http                        = '%s/%s' % (self.PMAN_URL, "api/v1/cmd"),
                     b_quiet                     = False,
                     b_raw                       = True,
-                    b_httpResponseBodyParse     = True,
-                    jsonwrapper                 = '',
+                    b_httpResponseBodyParse     = False,
+                    jsonwrapper                 = 'payload',
                     authToken                   = self.password
         )
-        print(dataComs())
-        return (json.loads(dataComs()))
+        
+        response = dataComs()
+        j_payload = json.loads(response)
+        print(j_payload)
+        return j_payload
 
 
     # Check status of job in Pman
@@ -162,7 +212,7 @@ class Health_Checker:
         post_request = {   "action": "status",
             "meta":  {
                 "key": "jid",
-                "value": '"' + self.JID + '"'
+                "value": self.JID
             }
         }
 
@@ -172,20 +222,21 @@ class Health_Checker:
                     http                        = '%s/%s' % (self.PMAN_URL, "api/v1/cmd"),
                     b_quiet                     = False,
                     b_raw                       = True,
-                    b_httpResponseBodyParse     = True,
-                    jsonwrapper                 = '',
+                    b_httpResponseBodyParse     = False,
+                    jsonwrapper                 = 'payload',
                     authToken                   = self.password
         )
-        print(dataComs())
-
-        return (json.loads(dataComs()))
+        response = dataComs()
+        j_payload = json.loads(response)
+        print(j_payload)
+        return j_payload
 
     # Downlad data from swift
     def run_pfioh_pull(self):
         post_request = {"action": "pullPath",
     "meta": {
         "remote": {
-            "key":  '"' + self.JID + '"'
+            "key":  self.JID
         },
         "local": {
             "path":         "/tmp/" + self.DIR,
@@ -211,16 +262,17 @@ class Health_Checker:
                     jsonwrapper                 = '',
                     authToken                   = self.password
         )
-        print(dataComs())
-
-        return (json.loads(dataComs()))
+        response = dataComs()
+        j_payload = json.loads(response)
+        print(j_payload)
+        return j_payload
     
     # Check if success rate is above threshold
     def conditionals(self, threshold, success_pfioh_push, success_pfioh_pull, success_pman_status, success_pman_run):
         state = True
         msg = ""
         if threshold > success_pfioh_push:
-            msg = ", Pfioh Push"
+            msg = " Pfioh Push"
             state = False
         if threshold > success_pman_run:
             msg += ", Pman Run"
@@ -233,15 +285,7 @@ class Health_Checker:
         return state, msg
     
     
-    # Check if commands executed properly
-    def verify(self,result):
-        try:
-            if result['stdout']['status'] or result['stdout']['status'] == "finished": 
-                return True
-            else:
-                return False
-        except Exception:
-            return False
+   
 
     # Open a file and write to it
     def export(self, msg, file_name):
@@ -253,24 +297,21 @@ class Health_Checker:
         if state==False:
             msg = msg[2:]
             self.export(msg, 'env.groovy')
-            raise Exception
     
     # Log errors in file which would be used in email
     def log_error(self,file_name, error):
         with open(file_name, "w") as file:
             file.write(error)
 
-    # Checks if job is currently running in pman
-    def job_execution(self, output):
-        try:
-            if output['stdout']['status'] == "started":
-                return True
-        except Exception:
-            return False
     
     # Reentrancy testing - checks if a job with specific JID is present in Pman
     def check_job_status(self):
-        if self.verify(self.run_pman_status()) or self.job_execution(self.run_pman_status()):
+        status = self.run_pman_status()
+        if not("Not Found" in  status['status']):
+            self.job_delete()
+        
+        if isinstance(status, str):
+            print("str:    ")
             self.job_delete()
     
     # creates a new file
