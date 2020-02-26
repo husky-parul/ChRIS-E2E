@@ -1,8 +1,7 @@
 # MOC Health Reporter - v1.0
 
-********
-***Overview***
-********
+
+## Overview
 
 This repository provides an application for pfurl project. It sends a generic command from pfurl to send local files to Pfioh, run a sample job on pman, and fetch the files back from pfioh. Overall, it tests all of the core elements of ChRIS Platform with the requirement of only one job id, making the process reentrant. 
 
@@ -11,17 +10,17 @@ This repository provides an application for pfurl project. It sends a generic co
  
 
 MOC Health Reporter
-=====
+
 
 Fundamentally, ``MOC Health Reporter`` is a status fetcher used to send http-based messages to remote services such as ``pman`` and ``pfioh``, in order to test their reliability and response time. 
 
 
-************
-Installation
-************
 
-Python Environments
-==========================
+## Installation
+
+
+### Python Environments
+
 
 On any Linux OS, clone this repository and change arguments of config.cfg
 
@@ -36,8 +35,8 @@ Run the program
      python3 moc-heath-check/automate.py
 
 
-Jenkins CI 
-===============
+## Jenkins CI 
+
 
 
 On any Linux OS, clone this repository and change arguments of config.cfg
@@ -59,3 +58,13 @@ Commit your changes and configure an email server in your jenkins account
     
 
 ![Jenkins Pipeline Setup](images/one.png)
+
+## Jenkins CI on OpenShift 3.11
+
+```
+oc new-project jenkins
+oc create secret generic kubecfg --from-file=$HOME/.kube/config -n jenkins
+oc create secret generic configs-secret --from-file=moc-health-check/credentials.cfg -n jenkins
+oc new-app moc-health-check/jenkins-template.json
+```
+Follow  [Jenkins CI section](#jenkins-ci)  to create and run pipeline.
