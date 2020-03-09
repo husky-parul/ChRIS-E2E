@@ -160,12 +160,23 @@ class Health_Checker:
             else:
                 return False
         elif service == self.pman_run:
-           return (True if result['status'] == True else False)
+            if '504 Gateway Time-out' in result:
+                return False
+            elif result['status'] == True:
+                return True
+            else:
+                return False
            
         elif service == self.run_pfioh_pull:
             return(True if result['stdout']['status'] == True else False)
         elif service == self.run_pman_status:
-            return (True if ('finished' in result['d_ret']['l_status'] or result['status'] == 'Not Found') else False)
+            if '504 Gateway Time-out' in result:
+                return False
+            elif 'finished' in result['d_ret']['l_status'] or result['status'] == 'Not Found':
+                return True
+            else:
+                return False
+            # return (True if ('finished' in result['d_ret']['l_status'] or result['status'] == 'Not Found') else False)
         else:
              exit(0)
           
@@ -307,12 +318,15 @@ class Health_Checker:
     # Reentrancy testing - checks if a job with specific JID is present in Pman
     def check_job_status(self):
         status = self.run_pman_status()
-        if not("Not Found" in  status['status']):
-            self.job_delete()
-        
+
         if isinstance(status, str):
             print("str:    ")
             self.job_delete()
+        
+        elif not("Not Found" in  status['status']):
+            self.job_delete()
+        
+        
     
     # creates a new file
     def createFile(self, name):
