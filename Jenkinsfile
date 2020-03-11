@@ -7,7 +7,7 @@ pipeline {
 		stage('test') {
 			steps {
 				sh '''
-					// python3 -u moc-health-check/automate.py
+					python3 -u moc-health-check/automate.py
 				'''
 			}
 
@@ -17,6 +17,7 @@ pipeline {
 						echo "Downloading build console output"
 						cat ${JENKINS_HOME}/jobs/${JOB_NAME}/builds/${BUILD_NUMBER}/log >> log.txt
 						ls -la
+						cat env.groovy
 					'''
 					script{
 						load "env.groovy"
@@ -26,7 +27,7 @@ pipeline {
 							println env.EMAIL_MAXTIME.isInteger()
 							println env.FAILED.isInteger()
 							// println env.EMAIL_WAITTIME.multiply(env.FAILED)
-							int int_current_value = env.EMAIL_WAITTIME.
+							int int_current_value = env.EMAIL_WAITTIME
 							int failed = env.FAILED
 							int val = int_current_value * failed
 							println val

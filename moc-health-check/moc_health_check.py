@@ -24,7 +24,36 @@ class Health_Checker:
         self.JID = config.get('ConfigInfo', 'JID')
         self.attempts = 0
         self.DIR = 'files'
-        self.password = config.get('ConfigInfo', 'PASSWORD')
+        
+        configPath = "/etc/configs-secret/credentials.cfg"
+        credConfig = configparser.ConfigParser()
+        try:
+            f = open(configPath, 'r')
+            credConfig.readfp(f)
+        finally:
+            f.close()
+
+        options = {
+            'auth_version':         3,
+            'password':          credConfig['AUTHORIZATION']['password'],
+            'email_to':          credConfig['EMAIL']['email_to']
+        }
+        self.password = options.get('password')
+        with open("../env.groovy", "a+") as file_object:
+            file_object.seek(0)
+            data = file_object.read(100)
+            if len(data) > 0 :
+                file_object.write("\n")
+            file_object.write("env.TO="+options.get('email_to'))
+        # with open("../env.groovy", "a+") as env_file:
+        #     env_file.write("\nenv.TO="+options.get('email_to'))
+        
+        print("_________________ env **************************")
+        f = open("../env.groovy", "r")
+        print(f.read())
+
+    
+
 
         # Creating sample files
         test_setup.automate(5)
