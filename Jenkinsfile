@@ -7,7 +7,7 @@ pipeline {
 		stage('test') {
 			steps {
 				sh '''
-					// python3 -u moc-health-check/automate.py
+					python3 -u moc-health-check/automate.py
 				'''
 			}
 
